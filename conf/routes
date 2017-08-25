@@ -1,0 +1,15 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# An example controller showing a sample home page
+GET     /                           controllers.GameController.index
+
+GET     /:gid/game                  controllers.GameController.playGame(gid)
+
+POST    /:id/join                   controllers.GameController.joinGame(id: String)
+
+POST    /newGame                    controllers.GameController.newGame
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

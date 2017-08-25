@@ -1,0 +1,63 @@
+@*
+ * This template takes a single argument, a String containing a
+ * message to display.
+ *@
+@(games: Seq[model.Game])
+
+@*
+ * Call the `main` template with two arguments. The first
+ * argument is a `String` with the title of the page, the second
+ * argument is an `Html` object containing the body of the page.
+ *@
+@main("Asteroids in Orbit") {
+
+    <div class="container">
+
+        <div class="jumbotron">
+            <h1 class="display-3">Asteroids in Orbit</h1>
+            <p>This is a sample game being progressively developed through term to demonstrate various
+            tools and techniques.</p>
+        </div>
+
+        <h2>Now playing...</h2>
+
+        @if(games.nonEmpty) {
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Players</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for(game <- games) {
+                    <tr>
+                        <td>@{game.id.id}</td>
+                        <td>
+                            @{game.players.map(_.name).mkString(", ")}
+                        </td>
+                        <td>
+                            <form method="post" action="/@{game.id.id}/join">
+                                <button class="btn btn-primary btn-sm" type="submit">Join</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+
+                </tbody>
+            </table>
+        } else {
+            <p>No games are being played at the moment.</p>
+        }
+
+        <form method="post" action="/newGame">
+            <button class="btn btn-primary" type="submit">Create a new game</button>
+        </form>
+
+
+
+    </div>
+
+
+}
