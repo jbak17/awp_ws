@@ -37,10 +37,9 @@ kept on the server.
  */
 
 function Square(props) {
+    const img = (props.value) ? props.value.symbol : "";
     return (
-        <button className={props.color} onClick={props.onClick}>
-            <span>{props.value}</span>
-        </button>
+        <button className={props.color} onClick={props.onClick} value={img}></button>
     );
 }
 
@@ -72,10 +71,15 @@ class Row extends React.Component{
 
 class Board extends React.Component {
 
+    /*
+    We only want to pass through the relevant squares to each section.
+    0-7, 8-15, 16-23, 24-31, 32-39, 40-47, 48-55, 56-63
+    As code slice(8*i, (8*(i+1)-1)
+     */
     render() {
         let columns = [];
         for (let i = 0; i<8; i++){
-            columns.push(<Row rowID={8-i} squares={this.props.squares} onClick={i => this.handleClick(i)} color={i%2}/>)
+            columns.push(<Row rowID={8-i} squares={this.props.squares.slice(8*i, (8*(i+1)-1))} onClick={i => this.handleClick(i)} color={i%2}/>)
         }
         return (
             <table>{columns}</table>
@@ -84,37 +88,41 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
-    constructor() {
+    constructor(props) {
         super();
         this.state = {
-            history: [
-                {
-                    squares: Array(64).fill(null)
-                }
-            ],
+            history: [{
+                    squares: new Array(64).fill(null),
+                    pieces: JSON.parse(props.startBoard),
+            }],
         };
+    }
+
+    /*
+    Sets the value of each square to its initial state
+    as passed in through constructor.
+     */
+    update(pieces){
+        let board = new Array(64).fill(null);
+        pieces.forEach(e => {
+            const location = e.location.square;
+            board[location-1] = e;
+        });
+        return board
     }
 
     handleClick(i) {}
 
     render() {
-        const history = this.state.history;
-        const current = history[0];
-
-        const moves = history.map((step, move) => {
-            const desc = move ? "Move #" + move : "Game start";
-            return (
-                <li key={move}>
-                    <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
-                </li>
-            );
-        });
-
+        //this.update(this.state.history.pieces);
+        const history = this.state.history[0];
+        let current = this.update(history.pieces);
+        console.log(current);
         return (
             <div className="game">
                 <div className="game-board">
                     <Board
-                        squares={current.squares}
+                        squares={current}
                         onClick={i => this.handleClick(i)}
                     />
                 </div>
@@ -127,4 +135,4 @@ class Game extends React.Component {
 let root = document.getElementById('reactRoot');
 let game_data = root.getAttribute('game');
 
-ReactDOM.render(<Game data={game_data}/>, root);
+ReactDOM.render(<Game startBoard={game_data}/>, root);

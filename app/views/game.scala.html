@@ -3,7 +3,8 @@
 * message to display.
 *@
 @import model._
-@(games: Game)
+@import play.api.libs.json.JsValue
+@(games: JsValue)
 
 @*
 * Call the `main` template with two arguments. The first
@@ -18,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.2/react-dom.min.js"></script>
     <script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
 
-    <div class="col-8" id="reactRoot" game="@games.gameState"></div>
+    <div class="col-8" id="reactRoot" game="@games"></div>
 
     <script type="text/jsx" src="/assets/javascripts/react_test.jsx"></script>
 

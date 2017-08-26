@@ -27,7 +27,7 @@ class GameController @Inject()(cc: ControllerComponents,
     val game: Option[Game] = gameService.getGame(gid)
     game match {
       case Some(g) =>
-        Ok(views.html.game(g))
+        Ok(views.html.game(Chess.gameStateToJson(g.gameState)))
       case None =>
         Ok(views.html.index(gameService.allGames))
     }

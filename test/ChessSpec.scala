@@ -1,5 +1,7 @@
+import model.Chess.JsonPiece
 import model._
 import org.scalatestplus.play._
+import play.api.libs.json.{JsNumber, JsValue, Json}
 
 class ChessSpec extends PlaySpec {
 /*
@@ -82,6 +84,27 @@ class ChessSpec extends PlaySpec {
     val r: ChessPiece = g.pieces.filter(p => p.isInstanceOf[Pawn]).head
     val m: List[Square] = r.validMove(g)
     r.validMove(g).length mustBe 2
+  }
+
+  //------- JSON -----------
+  val sq: Square = Square(1,2)
+  "The square A2 should have a json value of 2 passed to front-end" in {
+    val js: JsValue = Json.toJson(sq)
+    (js \ "square").get mustBe JsNumber(2)
+  }
+  "All pieces should have a JSON representation" in {
+    val pieces: List[JsonPiece] = List(
+      King("w", sq),
+      Queen("w", sq),
+      Bishop("w", sq),
+      Rook("w", sq),
+      Pawn("w", sq),
+      Knight("w", sq)
+    ).map(ChessPiece.toJsonPiece(_))
+    val js: List[JsValue] = pieces.map(p => Json.toJson(p))
+
+    (js.head \ "colour") mustBe "w"
+
   }
 
 

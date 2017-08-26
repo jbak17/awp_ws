@@ -1,27 +1,46 @@
 package model
 
-import model.Chess.GameState
+import model.Chess.{GameState, JsonPiece}
+import play.api.libs.json._
 
 import scala.annotation.tailrec
+
 
 /*
 @brief represent locations on a chess board, eg A1, F6
  */
 case class Square(R: Int,C: Int){
-
-  val ColumnMap: Map[Int, Char] = Map(1->'A', 2->'B', 3->'C', 4->'D', 5->'E', 6->'F', 7->'G', 8->'H')
+  val ColumnMap: Map[Int, String] = Map(1->"A", 2->"B", 3->"C", 4->"D", 5->"E", 6->"F", 7->"G", 8->"H")
 
   override def toString: String = ColumnMap(C) + R.toString
 
 }
 
+object Square {
+
+  implicit val squareWrites = new Writes[Square] {
+    /*
+    Position is between 1 and 64 for placement on board at front-end.
+     */
+    def writes(sq: Square) = {
+      val position = if (sq.R > 1) {(sq.R-1)*8 + sq.C} else {sq.C}
+      Json.obj(
+        "square" -> position
+      )
+    }
+  }
+}
+
 trait ChessPiece {
 
-  val colour: Char
-  val location: Square
   val kind: String //used to turn into Documents
+  val representation: String //unicode for display
 
-  //assert(colour == 'b' || colour == 'w')
+  val location: Square
+  val colour: String
+
+
+  //assert(colour == "b" || colour == "w")
 
   /*
   @brief returns updated piece at newLocation
@@ -130,11 +149,12 @@ trait ChessPiece {
 
 }
 
-case class King(colour: Char, location: Square) extends ChessPiece {
+case class King(colour: String, location: Square) extends ChessPiece {
 
   val inCheck: Boolean = false
 
   val kind: String = "King"
+  val representation: String = if (colour == "w") "&#9812;" else "265A"
 
   def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
 
@@ -159,44 +179,21 @@ case class King(colour: Char, location: Square) extends ChessPiece {
   }
 }
 
-case class Pawn(colour: Char, location: Square) extends ChessPiece {
+case class Queen (colour: String, location: Square) extends ChessPiece {
 
-  val kind: String = "Pawn"
+  val kind: String = "Queen"
+  val representation = if (colour == "w") "&#9813;" else "265A"
 
-  val advance: Int = if (colour == 'w') 1 else -1
+  def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
 
-  def move(newLocation: Square): ChessPiece = Pawn(this.colour, newLocation)
+  def validMove(game: GameState): List[Square] = goDiagonal(game) ::: goHorizontal(game)
 
-  def validMove(game: GameState): List[Square] = {
-    //list all possible moves
-    var moves = List(
-      //row is up and down; column left and right
-      Square(location.R + advance, location.C) //up
-    )
-    //if pawn hasn't moved from starting position
-    if(colour =='w' && location.R == 2){
-      moves = Square(location.R + 2, location.C) :: moves
-    } else if (colour =='b' && location.R == 7) {
-      moves = Square(location.R - 2, location.C) :: moves
-    }
-    //test for capture opportunities
-    val captures = List(
-      Square(location.R + advance, location.C - 1),
-      Square(location.R + advance, location.C + 1))
-
-    //check potential capture squares are occupied by opposition
-    val capSquare = captures.filter(sq => game.pieces.toList.contains(sq))
-    val capSquareWithOpposition = capSquare.filter(sq => oppositionPieces(game.pieces.toList).contains(sq))
-
-    //check all squares are on the board.
-    onBoard(capSquare ::: moves)
-  }
 }
 
-case class Rook(colour: Char, location: Square) extends ChessPiece {
-
+case class Rook(colour: String, location: Square) extends ChessPiece {
 
   val kind: String = "Rook"
+  val representation = if (colour == "w") "&#9814;" else "&#9820;"
 
   def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
   /*
@@ -206,9 +203,21 @@ case class Rook(colour: Char, location: Square) extends ChessPiece {
 
 }
 
-case class Knight (colour: Char, location: Square) extends ChessPiece {
+case class Bishop (colour: String, location: Square) extends ChessPiece {
+
+  val kind: String = "Bishop"
+  val representation = if (colour == "w") "&#9815;" else "&#9821;"
+
+  def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
+
+  def validMove(game: GameState): List[Square] = goDiagonal(game)
+
+}
+
+case class Knight (colour: String, location: Square) extends ChessPiece {
 
   val kind: String = "Knight"
+  val representation = if (colour == "w") "&#9816;" else "&#9822;"
 
 
   def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
@@ -235,33 +244,137 @@ case class Knight (colour: Char, location: Square) extends ChessPiece {
 
 }
 
-case class Bishop (colour: Char, location: Square) extends ChessPiece {
+case class Pawn(colour: String, location: Square) extends ChessPiece {
 
-  val kind: String = "Bishop"
+  val kind: String = "Pawn"
+  val representation = if (colour == "w") "&#9817;" else "&#9823;"
 
-  def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
+  val advance: Int = if (colour == "w") 1 else -1
 
-  def validMove(game: GameState): List[Square] = goDiagonal(game)
+  def move(newLocation: Square): ChessPiece = Pawn(this.colour, newLocation)
 
+  def validMove(game: GameState): List[Square] = {
+    //list all possible moves
+    var moves = List(
+      //row is up and down; column left and right
+      Square(location.R + advance, location.C) //up
+    )
+    //if pawn hasn't moved from starting position
+    if(colour =="w" && location.R == 2){
+      moves = Square(location.R + 2, location.C) :: moves
+    } else if (colour =="b" && location.R == 7) {
+      moves = Square(location.R - 2, location.C) :: moves
+    }
+    //test for capture opportunities
+    val captures = List(
+      Square(location.R + advance, location.C - 1),
+      Square(location.R + advance, location.C + 1))
+
+    //check potential capture squares are occupied by opposition
+    val capSquare = captures.filter(sq => game.pieces.toList.contains(sq))
+    val capSquareWithOpposition = capSquare.filter(sq => oppositionPieces(game.pieces.toList).contains(sq))
+
+    //check all squares are on the board.
+    onBoard(capSquare ::: moves)
+  }
 }
-
-case class Queen (colour: Char, location: Square) extends ChessPiece {
-
-  val kind: String = "Queen"
-
-  def move(newLocation: Square): ChessPiece = this.copy(location = newLocation)
-
-  def validMove(game: GameState): List[Square] = goDiagonal(game) ::: goHorizontal(game)
-
-}
-
 
 /*
+Reader and writer implicits for JSON
+ */
+object King {
+  implicit val kingWrites = new Writes[King] {
+
+    def writes(p: King) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+object Queen {
+  implicit val pieceWrites = new Writes[Queen] {
+
+    def writes(p: Queen) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+object Rook {
+  implicit val pieceWrites = new Writes[Rook] {
+
+    def writes(p: Rook) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+object Bishop {
+  implicit val pieceWrites = new Writes[Bishop] {
+
+    def writes(p: Bishop) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+object Knight {
+  implicit val pieceWrites = new Writes[Knight] {
+
+    def writes(p: Knight) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+object Pawn {
+  implicit val pieceWrites = new Writes[Pawn] {
+
+    def writes(p: Pawn) = {
+      Json.obj(
+        "location" -> p.location,
+        "colour" -> p.colour,
+        "symbol" -> p.representation,
+      )
+    }
+  }
+}
+
+
+
+
 object ChessPiece {
 
   val board: List[Square] = (for (c <- 1 to 8; r <- 1 to 8) yield Square(c, r)).toList
 
 
+  /*
+  Simplify representation to convert to aid in Json conversion
+  this is a preprocessor step.
+   */
+  def toJsonPiece(p: ChessPiece): Chess.JsonPiece = JsonPiece(p.colour, p.location, p.kind, p.representation)
+
+
 }
-*/
+
 
