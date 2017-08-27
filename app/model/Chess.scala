@@ -26,6 +26,13 @@ object Chess {
     representation: String
   )
 
+  /*todo We need to get back to a gamestate in order to
+  use the chess api. So we need to go from Json from the
+  server -> Seq[ChessPiece]. From the server we want
+  all the pieces.
+
+   */
+
   case class GameState(pieces:Seq[ChessPiece])
 
   def newGame():GameState = {
@@ -64,7 +71,7 @@ black and white pieces
       wrks ::: brks
     }
     def createBishops(): List[Bishop] = {
-      val nums = List(3, 5)
+      val nums = List(3, 6)
 
       val wrks = nums.map(x =>  Bishop(white, Square(1, x)))
       val brks = nums.map(x =>  Bishop(black, Square(8, x)))

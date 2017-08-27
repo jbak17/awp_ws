@@ -36,23 +36,78 @@ kept on the server.
 
  */
 
-function Square(props) {
-    const img = (props.value) ? props.value.symbol : "";
+function Square(param) {
+    //const img = (param.value) ? param.value.symbol : "";
+    if (param.value){
+        let pieceUrl;
+        switch (param.value.colour){
+            case 'b':
+                switch (param.value.type){
+                    case 'King':
+                        pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/e/e3/Chess_kdt60.png";
+                        break;
+                    case 'Queen':
+                        pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/a/af/Chess_qdt60.png";
+                        break;
+                    case 'Rook':
+                        pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Chess_rdt60.png';
+                        break;
+                    case 'Bishop':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/8/81/Chess_bdt60.png";
+                        break;
+                    case 'Knight':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chess_ndt60.png";
+                        break;
+                    case 'Pawn':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/c/cd/Chess_pdt60.png";
+                        break;
+                }
+                break;
+            case "w":
+                switch (param.value.type){
+                    case "King":
+                        pieceUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Chess_klt60.png";
+                        break;
+                    case 'Queen':
+                        pieceUrl="https://upload.wikimedia.org/wikipedia/commons/4/49/Chess_qlt60.png";
+                        break;
+                    case 'Rook':
+                        pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Chess_rlt60.png';
+                        break;
+                    case 'Bishop':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/9/9b/Chess_blt60.png";
+                        break;
+                    case 'Knight':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/2/28/Chess_nlt60.png";
+                        break;
+                    case 'Pawn':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Chess_plt60.png";
+                        break;
+                }
+                break;
+            default:
+                console.log('not working')
+        }
+        return (
+            <button className={param.colour} onClick={param.onClick}><img src={pieceUrl} width="25" height="25"/></button>
+        );
+    }
+
     return (
-        <button className={props.color} onClick={props.onClick} value={img}></button>
+        <button className={param.colour} onClick={param.onClick}></button>
     );
 }
 
 class Row extends React.Component{
 
     renderSquare(i) {
-        let color;
-        ((i + this.props.color ) % 2 === 0) ? color = "wsquare" : color = "bsquare";
+        let colour;
+        ((i + this.props.colour ) % 2 === 0) ? colour = "wsquare" : colour = "bsquare";
 
-        //console.log(color);
+        //console.log(colour);
         return (
             <Square
-                color={color}
+                colour={colour}
                 column={i+1} //Column value in chess notation
                 value={this.props.squares[i]}
                 onClick={() => this.props.onClick(i)}
@@ -79,7 +134,7 @@ class Board extends React.Component {
     render() {
         let columns = [];
         for (let i = 0; i<8; i++){
-            columns.push(<Row rowID={8-i} squares={this.props.squares.slice(8*i, (8*(i+1)-1))} onClick={i => this.handleClick(i)} color={i%2}/>)
+            columns.push(<Row rowID={8-i} squares={this.props.squares.slice(8*i, (8*(i+1)))} onClick={i => this.props.handleClick(i)} colour={i%2}/>)
         }
         return (
             <table>{columns}</table>
@@ -111,7 +166,7 @@ class Game extends React.Component {
         return board
     }
 
-    handleClick(i) {}
+    handleClick(i) {console.log(this.props)}
 
     render() {
         //this.update(this.state.history.pieces);

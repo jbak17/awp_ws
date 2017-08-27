@@ -14,6 +14,13 @@ case class Square(R: Int,C: Int){
 
   override def toString: String = ColumnMap(C) + R.toString
 
+  /*used to convert pieces coming back from the server*/
+  def intToSquare(l: Int): Square = {
+    val row = if (l <= 8){1} else if (l == 64) {8} else l/8
+    val col = if (l%8 == 0) 8 else l%8
+    Square(row, col)
+  }
+
 }
 
 object Square {
@@ -29,6 +36,8 @@ object Square {
       )
     }
   }
+
+  //todo need to convert from int (1 to 64) back to square
 }
 
 trait ChessPiece {
@@ -374,6 +383,7 @@ object ChessPiece {
    */
   def toJsonPiece(p: ChessPiece): Chess.JsonPiece = JsonPiece(p.colour, p.location, p.kind, p.representation)
 
+  def intToSquare(l: Int): Square = Square(l/8, l%8)
 
 }
 
