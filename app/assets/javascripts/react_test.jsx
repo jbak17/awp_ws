@@ -36,6 +36,75 @@ kept on the server.
 
  */
 
+var websocket;
+
+class Square extends React.Component{
+
+    handleClick() {
+        console.log('this is:', this);
+    }
+
+    render() {
+        if (this.props.value){
+            let pieceUrl;
+            switch (this.props.value.colour){
+                case 'b':
+                    switch (this.props.value.type){
+                        case 'King':
+                            pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/e/e3/Chess_kdt60.png";
+                            break;
+                        case 'Queen':
+                            pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/a/af/Chess_qdt60.png";
+                            break;
+                        case 'Rook':
+                            pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Chess_rdt60.png';
+                            break;
+                        case 'Bishop':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/8/81/Chess_bdt60.png";
+                            break;
+                        case 'Knight':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chess_ndt60.png";
+                            break;
+                        case 'Pawn':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/c/cd/Chess_pdt60.png";
+                            break;
+                    }
+                    break;
+                case "w":
+                    switch (this.props.value.type){
+                        case "King":
+                            pieceUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Chess_klt60.png";
+                            break;
+                        case 'Queen':
+                            pieceUrl="https://upload.wikimedia.org/wikipedia/commons/4/49/Chess_qlt60.png";
+                            break;
+                        case 'Rook':
+                            pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Chess_rlt60.png';
+                            break;
+                        case 'Bishop':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/9/9b/Chess_blt60.png";
+                            break;
+                        case 'Knight':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/2/28/Chess_nlt60.png";
+                            break;
+                        case 'Pawn':
+                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Chess_plt60.png";
+                            break;
+                    }
+                    break;
+                default:
+                    console.log('not working')
+            }
+            return (
+                <button className={this.props.colour} onClick={(e) => this.handleClick(e)}><img src={pieceUrl} width="25" height="25"/></button>
+            );
+        }
+        return (
+            <button className={this.props.colour} onClick={this.props.onClick}></button>
+        );
+    }
+}
+/*
 function Square(param) {
     //const img = (param.value) ? param.value.symbol : "";
     if (param.value){
@@ -97,8 +166,9 @@ function Square(param) {
         <button className={param.colour} onClick={param.onClick}></button>
     );
 }
-
+*/
 class Row extends React.Component{
+
 
     renderSquare(i) {
         let colour;
@@ -110,10 +180,11 @@ class Row extends React.Component{
                 colour={colour}
                 column={i+1} //Column value in chess notation
                 value={this.props.squares[i]}
-                onClick={() => this.props.onClick(i)}
+                onClick={this.props.handleClick}
             />
         );
     }
+
 
     render() {
         let squares = [];
@@ -166,7 +237,7 @@ class Game extends React.Component {
         return board
     }
 
-    handleClick(i) {console.log(this.props)}
+    handleClick(i) {websocket.send(this.props)}
 
     render() {
         //this.update(this.state.history.pieces);
@@ -181,13 +252,75 @@ class Game extends React.Component {
                         onClick={i => this.handleClick(i)}
                     />
                 </div>
+                <div className="clock">
+                    <Clock />
+                </div>
             </div>
         );
     }
 }
 
+class Clock extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            time: 1200
+        };
+    }
+
+    componentDidMount() {
+        this.intervalID = setInterval(
+            () => this.tick(), 1000
+        );
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.intervalID);
+    }
+
+    tick() {
+        let oldState = this.state.time;
+        this.setState({
+            time: oldState - 1
+        });
+    }
+
+    render() {
+        let minutes = Math.floor(this.state.time / 60);
+        let seconds = this.state.time % 60;
+        return (
+            <p className="App-clock">
+                Time remaining: {minutes}:{seconds}.
+            </p>);
+    }
+}
 // ========================================
 let root = document.getElementById('reactRoot');
+
 let game_data = root.getAttribute('game');
+
+
+
+console.log("Websocket script was loaded");
+
+websocket = new WebSocket("ws://" + window.location.host + "/websocket");
+
+websocket.onmessage = function(msg) {
+    var json;
+    console.log("Received a message over the websocket:");
+    console.log(msg);
+    console.log("---");
+    //json = JSON.parse(msg.data);
+    //return rerender();
+};
+
+websocket.onopen = function() {
+    return alert("Connection with server open.");
+};
+
+websocket.send = function(msg) {
+    return JSON.stringify(msg);
+};
 
 ReactDOM.render(<Game startBoard={game_data}/>, root);

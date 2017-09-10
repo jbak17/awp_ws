@@ -2,9 +2,10 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import akka.actor.ActorRef
 import play.api.mvc._
 import services.GameService
-import model.{Chess, Game, Player, Id}
+import model.{Chess, Game, Id, Player}
 
 @Singleton
 class GameController @Inject()(cc: ControllerComponents,
@@ -44,5 +45,6 @@ class GameController @Inject()(cc: ControllerComponents,
 
     Redirect(routes.GameController.playGame(id))
   }
+
 
 }

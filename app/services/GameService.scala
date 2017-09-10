@@ -41,4 +41,5 @@ class GameService {
 
   def allGames:Seq[Game] = activeGames.values.toSeq
 
+
 }
