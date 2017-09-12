@@ -36,72 +36,101 @@ kept on the server.
 
  */
 
-var websocket;
+
+
+// window.websocket = new WebSocket("ws://" + window.location.host + "/websocket");
+//
+//
+// window.websocket.onmessage = function(msg) {
+//     var json;
+//     console.log("Received a message over the websocket:");
+//     console.log(msg);
+//     console.log("---");
+//     //json = JSON.parse(msg.data);
+//     //return rerender();
+// };
+//
+// window.websocket.onopen = function() {
+//     //return alert("Connection with server open.");
+// };
+//
+// window.websocket.send = function(msg) {
+//     return JSON.stringify(msg);
+// };
 
 class Square extends React.Component{
 
     handleClick() {
-        console.log('this is:', this);
+        console.log('this is:', this.props.value.location);
+        //window.websocket.send(this.props.value.location);
+    }
+    getPieceUrl(p) {
+        let pieceUrl;
+        switch (p.value.colour){
+            case 'b':
+                switch (p.value.type){
+                    case 'King':
+                        pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/e/e3/Chess_kdt60.png";
+                        break;
+                    case 'Queen':
+                        pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/a/af/Chess_qdt60.png";
+                        break;
+                    case 'Rook':
+                        pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Chess_rdt60.png';
+                        break;
+                    case 'Bishop':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/8/81/Chess_bdt60.png";
+                        break;
+                    case 'Knight':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chess_ndt60.png";
+                        break;
+                    case 'Pawn':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/c/cd/Chess_pdt60.png";
+                        break;
+                }
+                break;
+            case "w":
+                switch (p.value.type){
+                    case "King":
+                        pieceUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Chess_klt60.png";
+                        break;
+                    case 'Queen':
+                        pieceUrl="https://upload.wikimedia.org/wikipedia/commons/4/49/Chess_qlt60.png";
+                        break;
+                    case 'Rook':
+                        pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Chess_rlt60.png';
+                        break;
+                    case 'Bishop':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/9/9b/Chess_blt60.png";
+                        break;
+                    case 'Knight':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/2/28/Chess_nlt60.png";
+                        break;
+                    case 'Pawn':
+                        pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Chess_plt60.png";
+                        break;
+                }
+                break;
+            default:
+                console.log('not working')
+        }
+        return pieceUrl;
     }
 
     render() {
-        if (this.props.value){
-            let pieceUrl;
-            switch (this.props.value.colour){
-                case 'b':
-                    switch (this.props.value.type){
-                        case 'King':
-                            pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/e/e3/Chess_kdt60.png";
-                            break;
-                        case 'Queen':
-                            pieceUrl= "https://upload.wikimedia.org/wikipedia/commons/a/af/Chess_qdt60.png";
-                            break;
-                        case 'Rook':
-                            pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Chess_rdt60.png';
-                            break;
-                        case 'Bishop':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/8/81/Chess_bdt60.png";
-                            break;
-                        case 'Knight':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chess_ndt60.png";
-                            break;
-                        case 'Pawn':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/c/cd/Chess_pdt60.png";
-                            break;
-                    }
-                    break;
-                case "w":
-                    switch (this.props.value.type){
-                        case "King":
-                            pieceUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Chess_klt60.png";
-                            break;
-                        case 'Queen':
-                            pieceUrl="https://upload.wikimedia.org/wikipedia/commons/4/49/Chess_qlt60.png";
-                            break;
-                        case 'Rook':
-                            pieceUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Chess_rlt60.png';
-                            break;
-                        case 'Bishop':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/9/9b/Chess_blt60.png";
-                            break;
-                        case 'Knight':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/2/28/Chess_nlt60.png";
-                            break;
-                        case 'Pawn':
-                            pieceUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Chess_plt60.png";
-                            break;
-                    }
-                    break;
-                default:
-                    console.log('not working')
-            }
-            return (
-                <button className={this.props.colour} onClick={(e) => this.handleClick(e)}><img src={pieceUrl} width="25" height="25"/></button>
-            );
-        }
-        return (
-            <button className={this.props.colour} onClick={this.props.onClick}></button>
-        );
+        //occupied by piece
+       if(this.props.value){
+           return (
+               <button className={this.props.colour} onClick={(e) => this.handleClick(e)}><img src={this.getPieceUrl(this.props)} width="25" height="25"/></button>
+           );
+       }
+       else { //empty square
+           return (
+               <button className={this.props.colour} onClick={this.props.onClick}></button>
+           );
+       }
+
+
     }
 }
 /*
@@ -301,26 +330,5 @@ let root = document.getElementById('reactRoot');
 let game_data = root.getAttribute('game');
 
 
-
-console.log("Websocket script was loaded");
-
-websocket = new WebSocket("ws://" + window.location.host + "/websocket");
-
-websocket.onmessage = function(msg) {
-    var json;
-    console.log("Received a message over the websocket:");
-    console.log(msg);
-    console.log("---");
-    //json = JSON.parse(msg.data);
-    //return rerender();
-};
-
-websocket.onopen = function() {
-    return alert("Connection with server open.");
-};
-
-websocket.send = function(msg) {
-    return JSON.stringify(msg);
-};
 
 ReactDOM.render(<Game startBoard={game_data}/>, root);

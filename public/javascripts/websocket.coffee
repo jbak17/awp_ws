@@ -1,5 +1,7 @@
 console.log("Websocket script was loaded")
 
+window.received = []
+
 websocket = new WebSocket("ws://#{window.location.host}/websocket");
 
 websocket.onmessage = (msg) ->
@@ -7,7 +9,7 @@ websocket.onmessage = (msg) ->
   console.log(msg)
   console.log("---")
   json = JSON.parse(msg.data)
-  #window.received.push(json)
+  window.received.push(json)
   rerender()
 
 # Called when the connection to the server is opened.

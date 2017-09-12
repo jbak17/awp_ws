@@ -1,12 +1,11 @@
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.3")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.0")
 
 // Add less CSS
 addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.0.6")
 
 // Add coffeescript
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
-
 
 // Add require.js
 addSbtPlugin("com.typesafe.sbt" % "sbt-rjs" % "1.0.7")
