@@ -10,11 +10,11 @@
     window.websocket.onmessage = function(msg) {
         var json;
         console.log("Received a message over the websocket:");
-        console.log(msg);
+        console.log(msg.data);
         console.log("---");
-        json = JSON.parse(msg.data);
-        window.received.push(json);
-        return rerender();
+        //json = JSON.parse(msg.data);
+        window.received.push(msg.data);
+        //return rerender();
     };
 
     window.websocket.onopen = function() {
